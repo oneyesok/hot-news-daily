@@ -2,15 +2,10 @@ name: 每日热点推送
 
 on:
   schedule:
-    # 每天 08:00、12:00、15:00、18:00、21:00 UTC = 北京时间 16:00、20:00、23:00、02:00、05:00
-    # 改成北京时间每天 8点、12点、15点、18点、21点 = UTC 0点、4点、7点、10点、13点
+    # 北京时间 08:00 / 12:00 / 15:00 / 18:00 / 21:00
+    # → UTC     00:00 / 04:00 / 07:00 / 10:00 / 13:00
     - cron: '0 0,4,7,10,13 * * *'
-  workflow_dispatch:  # 支持手动触发
-    inputs:
-      test_mode:
-        description: '测试模式（仅抓取不发送邮件）'
-        required: false
-        default: 'false'
+  workflow_dispatch:
 
 jobs:
   hot-news:
@@ -18,19 +13,19 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - name: 检出代码
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: 设置 Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: 安装依赖
-        run: pip install requests beautifulsoup4
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
-      - name: 发送热点邮件
-        run: python hot_news.py
+      - name: Run hot news
+        run: python run.py
         env:
           SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
